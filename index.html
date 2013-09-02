@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0,
+          minimum-scale=0.5, maximum-scale=1.0, user-scalable=no">
+
+    <script src="lib/createjs-2013.05.14.min.js"></script>
+    <script src="lib/Box2dWeb-2.1.a.3.min.js"></script>
+
+    <script src='src/IdentifierPool.js' ></script>
+    <script src='src/Entity.js' ></script>
+    <script src='src/EntityManager.js' ></script>
+    <script src='src/System.js' ></script>
+    <script src='src/World.js' ></script>
+
+    <script src='InputSystem.js' ></script>
+    <script src='DisplaySystem.js' ></script>
+    <script src='OutOfLevelSystem.js' ></script>
+    <script src='GameWorkflowSystem.js' ></script>
+    <script src='PhysicsSystem.js' ></script>
+    <script src="breakouts.js"></script>
+    <style>
+      /* * /
+      canvas { border: 1px dotted black; position: absolute; top: 0; left:0; } 
+      /* */
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="breakouts" width="320" height="416">
+        no canvas
+      </canvas>
+      <!-- canvas id="debugCanvas" width="320" height="416">
+        no canvas
+      </canvas -->
+    </div>
+  </body>
+</html>
