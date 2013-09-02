@@ -45,17 +45,17 @@
 
       // WALLS
       var wallTop = world.createEntity();
-      wallTop.add('colision', {type: 'wall', w: 20 * BLOCK, h: 1 * BLOCK});
+      wallTop.add('colision', {type: 'wall', bodyType : 'static', w: 20 * BLOCK, h: 1 * BLOCK});
       wallTop.add('position', {x: 0.5 * 20 * BLOCK, y: 0.5 * 1 * BLOCK});
       world.addEntity(wallTop);
 
       var wallLeft = world.createEntity();
-      wallLeft.add('colision', {type: 'wall', w: 1 * BLOCK, h: 26 * BLOCK});
+      wallLeft.add('colision', {type: 'wall', bodyType : 'static',w: 1 * BLOCK, h: 26 * BLOCK});
       wallLeft.add('position', {x: 0.5 * 1 * BLOCK, y: 0.5 * 26 * BLOCK});
       world.addEntity(wallLeft);
 
       var wallRight = world.createEntity();
-      wallRight.add('colision', {type: 'wall', w: 1 * BLOCK, h: 26 * BLOCK});
+      wallRight.add('colision', {type: 'wall', bodyType : 'static',w: 1 * BLOCK, h: 26 * BLOCK});
       wallRight.add('position', {x: (19 + 0.5 * 1) * BLOCK, y: 0.5 * 26 * BLOCK});
       world.addEntity(wallRight);
 
@@ -63,7 +63,7 @@
       var paddle = world.createEntity();
       paddle.add('sprite', {src: 'res/tiles.png', w: 3 * BLOCK, h: BLOCK, x: 0 * BLOCK, y: 4 * BLOCK});
       paddle.add('position', {x: (9 + 0.5 * 3) * BLOCK, y: (23 + 0.5 * 1) * BLOCK});
-      paddle.add('colision', {type: 'paddle', w: 3 * BLOCK, h: 1 * BLOCK});
+      paddle.add('colision', {type: 'paddle', bodyType : 'kinematic', w: 3 * BLOCK, h: 1 * BLOCK});
       paddle.add('input', {});
       world.addEntity(paddle);
     }

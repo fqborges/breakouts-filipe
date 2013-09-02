@@ -148,18 +148,18 @@
   PhysicsSystem.prototype.entityAdded = function(entity) {
 
     var colision = entity.get('colision'),
+        physics = entity.get('position'),
         position = entity.get('position'),
         velocity = entity.get('velocity');
 
     if (colision && position) {
       var bodyTypeMap = {
-        'brick': b2Body.b2_staticBody,
-        'paddle': b2Body.b2_kinematicBody,
-        'wall': b2Body.b2_staticBody,
-        'ball': b2Body.b2_dynamicBody
+        'static': b2Body.b2_staticBody,
+        'kinematic': b2Body.b2_kinematicBody,
+        'dynamic': b2Body.b2_dynamicBody
       };
 
-      // ent.add('colision', {type:'brik', w: 2 * BLOCK, h: 1 * BLOCK});
+      // ent.add('colision', {type:'brick', w: 2 * BLOCK, h: 1 * BLOCK});
       var fixture = new b2FixtureDef;
       fixture.density = 1;
       fixture.restitution = 1;
@@ -175,7 +175,7 @@
 
       var bodyDef = new b2BodyDef;
       // get body def by colision type
-      bodyDef.type = bodyTypeMap[colision.type];
+      bodyDef.type = bodyTypeMap[colision.bodyType];
       bodyDef.position.x = position.x / SCALE;
       bodyDef.position.y = position.y / SCALE;
       bodyDef.fixedRotation = true;
