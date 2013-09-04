@@ -5,21 +5,39 @@
 
 (function() {
 
+  var resources = {
+    images : {
+      'tiles' : 'res/tiles.png'
+    },
+    spriteSheets : {
+      'tiles' : { image : 'tiles', width : 16, heigth: 16 }
+    },
+    animations : {
+      'ball' : { spriteSheet : 'tiles' }
+    }
+  };
+
   var breakouts = {
     BLOCK: 16,
     setup: function() {
 
+      // load
+      resources.images['tiles'] = new Image();
+      resources.images['tiles'].src = 'res/tiles.png';
+            
+      // setup stage
       var stage = new createjs.Stage('breakouts');
       stage.autoClear = true;
       stage.tickOnUpdate = false;
       createjs.Touch.enable(stage);
 
+      // setup world
       var world = this.world = new World();
       world.addSystem(new InputSystem(stage));
       world.addSystem(new PhysicsSystem());
       world.addSystem(new OutOfLevelSystem());
       world.addSystem(new GameWorkflowSystem());
-      world.addSystem(new DisplaySystem(stage));
+      world.addSystem(new DisplaySystem(stage, resources));
 
     },
     run: function() {
@@ -35,7 +53,6 @@
     },
     scene: function() {
       var BLOCK = breakouts.BLOCK;
-
       var world = this.world;
 
       // BACKGROUND
@@ -61,7 +78,7 @@
 
       // PADDLE
       var paddle = world.createEntity();
-      paddle.add('sprite', {src: 'res/tiles.png', w: 3 * BLOCK, h: BLOCK, x: 0 * BLOCK, y: 4 * BLOCK});
+      paddle.add('sprite', {imgid: 'tiles', w: 3 * BLOCK, h: BLOCK, x: 0 * BLOCK, y: 4 * BLOCK});
       paddle.add('position', {x: (9 + 0.5 * 3) * BLOCK, y: (23 + 0.5 * 1) * BLOCK});
       paddle.add('colision', {type: 'paddle', bodyType : 'kinematic', w: 3 * BLOCK, h: 1 * BLOCK});
       paddle.add('input', {});

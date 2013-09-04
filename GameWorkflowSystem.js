@@ -35,7 +35,7 @@ GameWorkflowSystem.prototype.step = function(delta) {
 
   if (ballCount === 0) {
     var ball = world.createEntity();
-    ball.add('sprite', {src: 'res/tiles.png', w: BLOCK, h: BLOCK, x: 7 * BLOCK, y: 4 * BLOCK});
+    ball.add('sprite', {imgid: 'tiles', w: BLOCK, h: BLOCK, x: 7 * BLOCK, y: 4 * BLOCK});
     ball.add('position', {x: 2 * BLOCK, y: 10 * BLOCK});
     ball.add('velocity', {x: 10, y: 10});
     ball.add('colision', {type: 'ball', bodyType : 'dynamic', w: 1 * BLOCK, h: 1 * BLOCK});
@@ -47,7 +47,7 @@ GameWorkflowSystem.prototype.step = function(delta) {
       for (var iy = 5; iy < 10; iy += 2) {
         var color = Math.floor(Math.random() * 4);
         var brik = world.createEntity();
-        brik.add('sprite', {src: 'res/tiles.png', x: 0 * BLOCK, y: color * BLOCK, w: 2 * BLOCK, h: 1 * BLOCK});
+        brik.add('sprite', {imgid: 'tiles', x: 0 * BLOCK, y: color * BLOCK, w: 2 * BLOCK, h: 1 * BLOCK});
         brik.add('position', {x: (ix + 0.5 * 2) * BLOCK, y: (iy + 0.5 * 1) * BLOCK});
         brik.add('colision', {type: 'brick',  bodyType : 'static', w: 2 * BLOCK, h: 1 * BLOCK});
         world.addEntity(brik);
