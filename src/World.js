@@ -34,7 +34,6 @@
    **/
   World.prototype.removeEntity = function(entity) {
     var index = this._removed.indexOf(entity);
-    console.log('removeEntity>' + index);
     if (index === -1) {
       this._removed.push(entity);
     }
@@ -89,7 +88,6 @@
     // handle removed entities
     for (var e = 0, ent; !!(ent = removed[e]); e++) {
       var index = ents.indexOf(ent);
-      console.log('handle removed entities>' +index);
       if (index !== -1) {
         ents.splice(index, 1);
       }

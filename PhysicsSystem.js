@@ -48,7 +48,7 @@
 
       system.contacts.push({a: entA, b: entB});
 
-      console.log('colision [' + entA.id + ', ' + entB.id + '] | ' + system.contacts.length);
+      //console.log('colision [' + entA.id + ', ' + entB.id + '] | ' + system.contacts.length);
       //if (contact.GetFixtureA().GetBody().GetUserData() == 'ball' || contact.GetFixtureB().GetBody().GetUserData() == 'ball') {
       //    var impulse = impulse.normalImpulses[0];
       //    if (impulse < 0.2) return; //threshold ignore small impacts
@@ -106,7 +106,7 @@
 
     for (var i = 0, len = this.contacts.length; i < len; i++) {
       var contact = this.contacts[i];
-      console.log('colision [' + contact.a.id + ', ' + contact.b.id + ']');
+      //console.log('colision [' + contact.a.id + ', ' + contact.b.id + ']');
       var colisionA = contact.a.get('colision');
       var colisionB = contact.b.get('colision');
       if (colisionA && colisionB) {

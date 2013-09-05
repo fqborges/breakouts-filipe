@@ -35,13 +35,13 @@ DisplaySystem.prototype.step = function() {
     if (view) {
       // set sprite
       var sprite = ent.get('sprite');
-      view.image = this._res.images[sprite.imgid];
+      view.image = sprite.image;
       var rect = view.sourceRect;
       rect.x = sprite.x;
       rect.y = sprite.y;
       rect.width = sprite.w;
       rect.heigth = sprite.h;
-    
+
       // set position
       var position = ent.get('position');
       view.x = position.x - 0.5 * rect.width;
@@ -66,13 +66,16 @@ DisplaySystem.prototype.entityAdded = function(entity) {
       position = entity.get('position');
   if (sprite && position)
   {
-    var bitmap = new createjs.Bitmap(null);
-    bitmap.image = this._res.images[sprite.imgid];
-    bitmap.sourceRect = new createjs.Rectangle(sprite.x, sprite.y, sprite.w, sprite.h);
-    bitmap.x = position.x - 0.5 * sprite.w;
-    bitmap.y = position.y - 0.5 * sprite.h;
-    this._stage.addChild(bitmap);
-    this._displayObjects[entity.id] = bitmap;
+    if (sprite.imgid) {
+      sprite.image = this._res.images[sprite.imgid];
+      sprite.imgid = null;
+    }
+    var view = new createjs.Bitmap(sprite.image);
+    view.sourceRect = new createjs.Rectangle(sprite.x, sprite.y, sprite.w, sprite.h);
+    view.x = position.x - 0.5 * sprite.w;
+    view.y = position.y - 0.5 * sprite.h;
+    this._stage.addChild(view);
+    this._displayObjects[entity.id] = view;
   }
 };
 
