@@ -10,6 +10,18 @@ var DisplaySystem = function(stage, resources) {
 };
 
 DisplaySystem.prototype.addToWorld = function(world) {
+
+  // setup fps
+  var stats = new Stats();
+  stats.setMode(0); // 0: fps, 1: ms
+  stats.domElement.style.position = 'relative';
+  stats.domElement.style.left = '0px';
+  stats.domElement.style.top = '0px';
+  this._stats = stats;
+  // end - setup fps
+
+  document.body.appendChild( stats.domElement );
+
   this._world = world;
 
   var ents = this._world.getEntities();
@@ -28,6 +40,7 @@ DisplaySystem.prototype.removeFromWorld = function() {
 };
 
 DisplaySystem.prototype.step = function() {
+  this._stats.begin();
 
   var ents = this._world.getEntities('position', 'sprite');
   for (var i = 0, ent; !!(ent = ents[i]); i++) {
@@ -50,6 +63,8 @@ DisplaySystem.prototype.step = function() {
   }
 
   this._stage.update();
+  
+  this._stats.end();
 };
 
 DisplaySystem.prototype.entityAdded = function(entity) {

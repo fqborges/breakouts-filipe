@@ -36,7 +36,7 @@
   var breakouts = {
     BLOCK: 16,
     load: function(loadComplete) {
-      var queue = new createjs.LoadQueue();
+      var queue = new createjs.LoadQueue(false);
       for (var key in resources.images) {
         var url = resources.images[key];
         queue.loadFile(url, false);
