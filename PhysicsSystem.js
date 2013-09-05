@@ -106,16 +106,8 @@
 
     for (var i = 0, len = this.contacts.length; i < len; i++) {
       var contact = this.contacts[i];
-      //console.log('colision [' + contact.a.id + ', ' + contact.b.id + ']');
-      var colisionA = contact.a.get('colision');
-      var colisionB = contact.b.get('colision');
-      if (colisionA && colisionB) {
-        if (colisionA.type === 'brick') {
-          this.world.removeEntity(contact.a);
-        } else if (colisionB.type === 'brick') {
-          this.world.removeEntity(contact.b);
-        }
-      }
+      contact.a.add('collision', { other : contact.b } );
+      contact.b.add('collision', { other : contact.a } );
     }
     this.contacts.length = 0;
   };
@@ -147,35 +139,34 @@
 
   PhysicsSystem.prototype.entityAdded = function(entity) {
 
-    var colision = entity.get('colision'),
-        physics = entity.get('position'),
+    var rigidBody = entity.get('rigidBody'),
         position = entity.get('position'),
         velocity = entity.get('velocity');
 
-    if (colision && position) {
+    if (rigidBody && position) {
       var bodyTypeMap = {
         'static': b2Body.b2_staticBody,
         'kinematic': b2Body.b2_kinematicBody,
         'dynamic': b2Body.b2_dynamicBody
       };
 
-      // ent.add('colision', {type:'brick', w: 2 * BLOCK, h: 1 * BLOCK});
+      // ent.add('rigidBody', {bodyType : 'dynamic', w: 2 * BLOCK, h: 1 * BLOCK});
       var fixture = new b2FixtureDef;
       fixture.density = 1;
       fixture.restitution = 1;
       fixture.friction = 0;
 
-      if (colision.type === 'ball' && false) {
-        var rad = 0.5 * colision.w;
+      if (rigidBody.type === 'ball' && false) {
+        var rad = 0.5 * rigidBody.w;
         fixture.shape = new b2CircleShape(rad / SCALE);
       } else {
         fixture.shape = new b2PolygonShape;
-        fixture.shape.SetAsBox(0.5 * colision.w / SCALE, 0.5 * colision.h / SCALE);
+        fixture.shape.SetAsBox(0.5 * rigidBody.w / SCALE, 0.5 * rigidBody.h / SCALE);
       }
 
       var bodyDef = new b2BodyDef;
       // get body def by colision type
-      bodyDef.type = bodyTypeMap[colision.bodyType];
+      bodyDef.type = bodyTypeMap[rigidBody.bodyType];
       bodyDef.position.x = position.x / SCALE;
       bodyDef.position.y = position.y / SCALE;
       bodyDef.fixedRotation = true;
