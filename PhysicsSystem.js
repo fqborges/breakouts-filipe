@@ -80,7 +80,12 @@
 
   PhysicsSystem.prototype.step = function(delta) {
 
-    this.movePaddle();
+    var collidedEnts = this.world.getEntities('collision');
+    for(var i = 0, ent; !!(ent = collidedEnts[i]); i++ ) {
+      ent.del('collision');
+    }
+    
+    this.handleMoveTo();
 
     var updated = false;
     this.fixedTimestepAccumulator += delta / 1000.0;
@@ -101,18 +106,17 @@
       }
     }
 
-    this.b2world.ClearForces();
-    //this.b2world.DrawDebugData();
-
     for (var i = 0, len = this.contacts.length; i < len; i++) {
       var contact = this.contacts[i];
       contact.a.add('collision', { other : contact.b } );
       contact.b.add('collision', { other : contact.a } );
     }
     this.contacts.length = 0;
+    
+    //this.b2world.DrawDebugData();
   };
 
-  PhysicsSystem.prototype.movePaddle = function() {
+  PhysicsSystem.prototype.handleMoveTo = function() {
 
     var ent = this.world.getEntities('moveTo')[0];
     if (ent) {

@@ -35,8 +35,12 @@ AnimationSystem.prototype.step = function(delta) {
       while (animated.frameElapsed >= timestep) {
         animated.frameElapsed -= timestep;
         frameIndex++;
-        if (!animation.frames[frameIndex]) {
-          frameIndex = 0;
+        if (frameIndex >= animation.frames.length) {
+          if( animation.loop) {
+            frameIndex = 0;
+          } else {
+            ent.del('animated');
+          }
         }
         updated = true;
       }
@@ -50,7 +54,6 @@ AnimationSystem.prototype.step = function(delta) {
       sprite.y = rect.y;
       sprite.w = rect.width;
       sprite.h = rect.height;
-
       animated.currentFrameIndex = frameIndex;
     }
     console.log(frameIndex);

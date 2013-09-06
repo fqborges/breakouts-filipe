@@ -23,12 +23,28 @@
       'anim_ball': {
         spriteSheet: 'img_tiles_16x16',
         frames: [51, 52, 53, 54, 55],
-        fps: 7.5
+        loop: true,
+        fps: 5
       },
-      'anim_brick_destroy': {
+      'anim_brick_destroy_blue': {
         spriteSheet: 'img_tiles_32x16',
-        frames: [0, 1, 2, 3, 4],
-        fps: 7.5
+        frames: [1, 2, 3, 4],
+        fps: 8
+      },
+      'anim_brick_destroy_orange': {
+        spriteSheet: 'img_tiles_32x16',
+        frames: [7, 8, 9, 10],
+        fps: 8
+      },
+      'anim_brick_destroy_red': {
+        spriteSheet: 'img_tiles_32x16',
+        frames: [13, 14, 15, 16],
+        fps: 8
+      },
+      'anim_brick_destroy_green': {
+        spriteSheet: 'img_tiles_32x16',
+        frames: [18, 19, 20, 21],
+        fps: 8
       }
     }
   };
