@@ -17,7 +17,7 @@
   var b2Listener = Box2D.Dynamics.b2ContactListener;
 
   var SCALE = 16;
-  var TIMESTEP = 1 / 60;
+  var TIMESTEP = 1 / 30;
 
   var PhysicsSystem = function() {
     this.world = null;
@@ -47,14 +47,6 @@
       var entB = contact.GetFixtureB().GetBody().GetUserData();
 
       system.contacts.push({a: entA, b: entB});
-
-      //console.log('colision [' + entA.id + ', ' + entB.id + '] | ' + system.contacts.length);
-      //if (contact.GetFixtureA().GetBody().GetUserData() == 'ball' || contact.GetFixtureB().GetBody().GetUserData() == 'ball') {
-      //    var impulse = impulse.normalImpulses[0];
-      //    if (impulse < 0.2) return; //threshold ignore small impacts
-      //    world.ball.impulse = impulse > 0.6 ? 0.5 : impulse;
-      //    console.log(world.ball.impulse);
-      //}
     };
     this.b2world.SetContactListener(listener);
 

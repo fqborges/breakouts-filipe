@@ -24,7 +24,7 @@
         spriteSheet: 'img_tiles_16x16',
         frames: [51, 52, 53, 54, 55],
         loop: true,
-        fps: 5
+        fps: 15
       },
       'anim_brick_destroy_blue': {
         spriteSheet: 'img_tiles_32x16',
@@ -106,7 +106,7 @@
       var world = this.world;
 
       createjs.Ticker.useRAF = true;
-      createjs.Ticker.setFPS(60);
+      createjs.Ticker.setFPS(30);
       createjs.Ticker.addEventListener('tick',
           function(event) {
             if (!event.paused)

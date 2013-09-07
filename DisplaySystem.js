@@ -18,9 +18,8 @@ DisplaySystem.prototype.addToWorld = function(world) {
   stats.domElement.style.left = '0px';
   stats.domElement.style.top = '0px';
   this._stats = stats;
-  // end - setup fps
-
   document.body.appendChild( stats.domElement );
+  // end - setup fps
 
   this._world = world;
 

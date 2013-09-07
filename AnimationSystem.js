@@ -56,6 +56,5 @@ AnimationSystem.prototype.step = function(delta) {
       sprite.h = rect.height;
       animated.currentFrameIndex = frameIndex;
     }
-    console.log(frameIndex);
   }
 };

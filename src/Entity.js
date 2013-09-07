@@ -32,7 +32,7 @@ var root = this;
    * has( {string} ) -> {boolean}
    **/
   Entity.prototype.has = function(name) {
-    return !!this._components[name];
+    return name in this._components;
   };
 
   /**
