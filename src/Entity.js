@@ -7,9 +7,10 @@ var root = this;
   /**
    * Entity
    **/
-  var Entity = function(id) {
+  var Entity = function(id, em) {
 
     this.id = id;
+    this.em = em;
 
     this._components = {};
   };
@@ -18,6 +19,7 @@ var root = this;
    * add( {string}, {object} )
    **/
   Entity.prototype.add = function(name, component) {
+    this.em.addComponent(name, this.id, component);
     this._components[name] = component;
   };
 
@@ -40,6 +42,7 @@ var root = this;
    **/
   Entity.prototype.del = function(name) {
     delete this._components[name];
+    this.em.deleteComponent(name, this.id);
   };
 
   /**
