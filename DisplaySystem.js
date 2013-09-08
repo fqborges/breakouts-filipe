@@ -18,86 +18,83 @@ DisplaySystem.prototype.addToWorld = function(world) {
   stats.domElement.style.left = '0px';
   stats.domElement.style.top = '0px';
   this._stats = stats;
-  document.body.appendChild( stats.domElement );
+  document.body.appendChild(stats.domElement);
   // end - setup fps
 
   this._world = world;
-
-  var ents = this._world.getEntities();
-  for (var i = 0, ent; !!(ent = ents[i]); i++) {
-    this.entityAdded(ent);
-  }
 };
 
 DisplaySystem.prototype.removeFromWorld = function() {
+  var stats = this._stats;
+  document.body.removeChild(stats.domElement);
 
-  var ents = this._world.getEntities('position', 'sprite');
-  for (var i = 0, ent; !!(ent = ents[i]); i++) {
-    this.entityRemoved(ent);
-  }
+  this._stats = null;
   this._world = null;
 };
 
 DisplaySystem.prototype.step = function() {
-  this._stats.begin();
+  var world = this._world;
 
-  var ents = this._world.getEntities('position', 'sprite');
-  for (var i = 0, ent; !!(ent = ents[i]); i++) {
-    var view = this._displayObjects[ent.id];
-    if (view) {
-      // set sprite
-      var sprite = ent.get('sprite');
-      view.image = sprite.image;
-      var rect = view.sourceRect;
-      rect.x = sprite.x;
-      rect.y = sprite.y;
-      rect.width = sprite.w;
-      rect.heigth = sprite.h;
-
-      // set position
-      var position = ent.get('position');
-      view.x = position.x - 0.5 * rect.width;
-      view.y = position.y - 0.5 * rect.heigth;
+  // removed sprites
+  for (var eid in this._displayObjects) {
+    var ent = world.getEntityById(eid);
+    if (!ent || !ent.has('sprite')) {
+      var view = this._displayObjects[eid];
+      this._stage.removeChild(view);
+      delete this._displayObjects[eid];
     }
   }
 
+  // sync each sprite with its view
+  var ents = world.getEntities('sprite');
+  for (var i = 0, ent; !!(ent = ents[i]); i++) {
+    // if not has position, ignore
+    var position = ent.get('position');
+    if (!position) {
+      continue;
+    }
+    // get sprite and check image
+    var sprite = ent.get('sprite');
+    if (sprite.imgid) {
+      sprite.image = this._res.images[sprite.imgid];
+      sprite.imgid = null;
+    }
+    // if sprite not has a view, create it
+    var view = this._displayObjects[ent.id];
+    if (!view) {
+      view = this._createSpriteView(ent);
+    }
+    // sync sprite attributes to view
+    view.image = sprite.image;
+    var rect = view.sourceRect;
+    rect.x = sprite.x;
+    rect.y = sprite.y;
+    rect.width = sprite.w;
+    rect.height = sprite.h;
+    view.x = position.x - 0.5 * rect.width;
+    view.y = position.y - 0.5 * rect.height;
+  }
+
   this._stage.update();
-  
-  this._stats.end();
+
+  this._stats.update();
 };
+
+DisplaySystem.prototype._createSpriteView = function(entity) {
+  var view = new createjs.Bitmap(null);
+  view.sourceRect = new createjs.Rectangle(0, 0, 1, 1);
+  this._stage.addChild(view);
+  this._displayObjects[entity.id] = view;
+  return view;
+}
 
 DisplaySystem.prototype.entityAdded = function(entity) {
 
   var bg = entity.get('background');
   if (bg)
   {
-    var background = new createjs.Bitmap(bg.src);
+    var background = new createjs.Bitmap(bg.image);
     this._stage.addChildAt(background, 0);
-    this._displayObjects[bg.id] = background;
   }
 
-  var sprite = entity.get('sprite'),
-      position = entity.get('position');
-  if (sprite && position)
-  {
-    if (sprite.imgid) {
-      sprite.image = this._res.images[sprite.imgid];
-      sprite.imgid = null;
-    }
-    var view = new createjs.Bitmap(sprite.image);
-    view.sourceRect = new createjs.Rectangle(sprite.x, sprite.y, sprite.w, sprite.h);
-    view.x = position.x - 0.5 * sprite.w;
-    view.y = position.y - 0.5 * sprite.h;
-    this._stage.addChild(view);
-    this._displayObjects[entity.id] = view;
-  }
-};
-
-DisplaySystem.prototype.entityRemoved = function(entity) {
-
-  var view = this._displayObjects[entity.id];
-  if (view) {
-    this._stage.removeChild(view);
-    this._displayObjects[entity.id] = null;
-  }
 };

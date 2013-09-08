@@ -34,6 +34,14 @@
       this._removed.push(entity);
     }
   };
+
+  /*
+   * 
+   * @returns {Entity}
+   */
+  World.prototype.getEntityById = function(eid) {
+    return this._em.getEntity(eid);
+  };
   /**
    * getEntities() -> {Array}
    **/

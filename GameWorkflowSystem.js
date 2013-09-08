@@ -18,25 +18,15 @@ GameWorkflowSystem.prototype.step = function(delta) {
   var world = this._world;
   var BLOCK = 16;
 
-  var destroyedEnts = this._world.getEntities('destroy');
-  for (var i = 0, ent; !!(ent = destroyedEnts[i]); i++) {
-    var destroy = ent.get('destroy');
-    if (destroy) {
-      destroy.timeout -= delta / 1000.0;
-      if (destroy.timeout <= 0) {
-        this._world.removeEntity(ent);
-      }
-    }
-  }
-
   var balls = this._world.getEntities('ball');
   var bricks = this._world.getEntities('brick');
+  var countdown = this._world.getEntities('countdown');
 
   if (balls.length === 0) {
     var ball = world.createEntity();
     ball.add('sprite', {imgid: 'img_tiles', w: BLOCK, h: BLOCK, x: 7 * BLOCK, y: 4 * BLOCK});
     ball.add('position', {x: 2 * BLOCK, y: 10 * BLOCK});
-    ball.add('velocity', {x: 8, y: 8});
+    //ball.add('velocity', {x: 8, y: 8});
     ball.add('rigidBody', {bodyType: 'dynamic', w: 1 * BLOCK, h: 1 * BLOCK});
     ball.add('animated', {animation: 'anim_ball'});
     ball.add('ball', {});
@@ -54,7 +44,7 @@ GameWorkflowSystem.prototype.step = function(delta) {
       anim.add('sprite', sprite);
       anim.add('position', position);
       anim.add('animated', {animation: 'anim_brick_destroy_' + color});
-      anim.add('destroy', {timeout: 0.5});
+      anim.add('expires', {timeout: 0.5});
       world.addEntity(anim);
     }
   }

@@ -7,7 +7,8 @@
 
   var resources = {
     images: {
-      'img_tiles': 'res/tiles.png'
+      'img_tiles': 'res/tiles.png',
+      'bg_prerendered': 'res/bg_prerendered.png'
     },
     spriteSheets: {
       'img_tiles_16x16': {
@@ -17,6 +18,10 @@
       'img_tiles_32x16': {
         images: ['img_tiles'],
         frames: {width: 32, height: 16}
+      },
+      'img_tiles_32x48': {
+        images: ['img_tiles'],
+        frames: {width: 32, height: 48}
       }
     },
     animations: {
@@ -25,6 +30,11 @@
         frames: [51, 52, 53, 54, 55],
         loop: true,
         fps: 15
+      },
+      'anim_countdown': {
+        spriteSheet: 'img_tiles_32x48',
+        frames: [12, 13, 14, 16],
+        fps: 1
       },
       'anim_brick_destroy_blue': {
         spriteSheet: 'img_tiles_32x16',
@@ -98,6 +108,7 @@
       world.addSystem(new PhysicsSystem());
       world.addSystem(new OutOfLevelSystem());
       world.addSystem(new GameWorkflowSystem());
+      world.addSystem(new ExpirationSystem());
       world.addSystem(new AnimationSystem(resources));
       world.addSystem(new DisplaySystem(stage, resources));
 
@@ -126,7 +137,7 @@
 
       // BACKGROUND
       var bg = world.createEntity();
-      bg.add('background', {src: 'res/bg_prerendered.png'});
+      bg.add('background', {image: resources.images['bg_prerendered']});
       world.addEntity(bg);
 
       // WALLS
@@ -152,6 +163,14 @@
       paddle.add('sprite', {imgid: 'img_tiles', w: 3 * BLOCK, h: BLOCK, x: 0 * BLOCK, y: 4 * BLOCK});
       paddle.add('input', {});
       world.addEntity(paddle);
+
+      // COUNTDOWN
+      var countdown = world.createEntity();
+      countdown.add('position', {x: 320 / 2, y: 480 / 2});
+      countdown.add('sprite', {});
+      countdown.add('animated', {animation: 'anim_countdown'});
+      countdown.add('expires', {timeout: 3});
+      world.addEntity(countdown);
     }
   };
 

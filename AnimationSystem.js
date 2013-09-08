@@ -21,7 +21,6 @@ AnimationSystem.prototype.step = function(delta) {
   var ents = this._world.getEntities('animated', 'sprite');
   for (var i = 0, ent; !!(ent = ents[i]); i++) {
     var animated = ent.get('animated');
-    if(!animated) console.log(ents);
     var animation = res.animations[animated.animation];
     var timestep = 1 / animation.fps;
     var updated = false;
