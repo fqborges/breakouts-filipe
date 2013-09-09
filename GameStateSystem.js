@@ -193,7 +193,9 @@ GameStateSystem.prototype.processGameState = function(gamedataEnt) {
 
       // create countdown entity
       var delay = world.createEntity();
-      delay.add('expires', {timeout: 1});
+      delay.add('position', {x: 320 / 2, y: 480 / 2});
+      delay.add('text', {value: 'Você Ganhou!', align: 'center'});
+      delay.add('expires', {timeout: 2});
       delay.add('delay', {});
       world.addEntity(delay);
 
@@ -201,19 +203,24 @@ GameStateSystem.prototype.processGameState = function(gamedataEnt) {
     }
     // if there is no more balls
     else if (balls.length === 0) {
+      // create countdown entity
+      var delay = world.createEntity();
+      delay.add('position', {x: 320 / 2, y: 480 / 2});
+      delay.add('text', {value: 'Você Perdeu!', align: 'center'});
+      delay.add('expires', {timeout: 2});
+      delay.add('delay', {});
+      world.addEntity(delay);
+
       gamedata.state = 'LOSE';
     }
   }
   //  === WIN | LOSE ===
-  else if (gamedata.state === 'WIN') {
+  else if (gamedata.state === 'WIN' || gamedata.state === 'LOSE') {
     // wait a delay before setup scene
     var result = this._world.getEntities('delay');
     if (result.length === 0) {
       gamedata.state = 'SETUP';
     }
-  }
-  else if (gamedata.state === 'LOSE') {
-    gamedata.state = 'SETUP';
   }
 
 };

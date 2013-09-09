@@ -6,7 +6,8 @@ var DisplaySystem = function(stage, resources) {
 
   this._res = resources;
   this._stage = stage;
-  this._displayObjects = {};
+  this._spriteViews = {};
+  this._textViews = {};
 };
 
 DisplaySystem.prototype.addToWorld = function(world) {
@@ -36,12 +37,22 @@ DisplaySystem.prototype.step = function() {
   var world = this._world;
 
   // removed sprites
-  for (var eid in this._displayObjects) {
+  for (var eid in this._spriteViews) {
     var ent = world.getEntityById(eid);
     if (!ent || !ent.has('sprite')) {
-      var view = this._displayObjects[eid];
+      var view = this._spriteViews[eid];
       this._stage.removeChild(view);
-      delete this._displayObjects[eid];
+      delete this._spriteViews[eid];
+    }
+  }
+
+  // removed text
+  for (var eid in this._textViews) {
+    var ent = world.getEntityById(eid);
+    if (!ent || !ent.has('text')) {
+      var view = this._textViews[eid];
+      this._stage.removeChild(view);
+      delete this._textViews[eid];
     }
   }
 
@@ -61,7 +72,7 @@ DisplaySystem.prototype.step = function() {
       sprite.imgid = null;
     }
     // if sprite not has a view, create it
-    var view = this._displayObjects[ent.id];
+    var view = this._spriteViews[ent.id];
     if (!view) {
       view = this._createSpriteView(ent);
     }
@@ -76,6 +87,28 @@ DisplaySystem.prototype.step = function() {
     view.y = position.y - 0.5 * rect.height;
   }
 
+  // sync each sprite with its view
+  var ents = world.getEntities('text');
+  for (var i = 0, ent; !!(ent = ents[i]); i++) {
+    // if not has position, ignore
+    var position = ent.get('position');
+    if (!position) {
+      position = {x: 0, y: 0};
+      ent.add('position', position);
+    }
+    // if sprite not has a view, create it
+    var text = ent.get('text');
+    var view = this._textViews[ent.id];
+    if (!view) {
+      view = this._createTextView(ent);
+    }
+    view.text = text.value;
+    view.textAlign = text.align;
+    // sync text to view
+    view.x = position.x;
+    view.y = position.y;
+  }
+
   this._stage.update();
 
   this._stats.update();
@@ -85,7 +118,14 @@ DisplaySystem.prototype._createSpriteView = function(entity) {
   var view = new createjs.Bitmap(null);
   view.sourceRect = new createjs.Rectangle(0, 0, 1, 1);
   this._stage.addChild(view);
-  this._displayObjects[entity.id] = view;
+  this._spriteViews[entity.id] = view;
+  return view;
+}
+
+DisplaySystem.prototype._createTextView = function(entity) {
+  var view = new createjs.Text("--", "20px Arial", "#ff7700");
+  this._stage.addChild(view);
+  this._textViews[entity.id] = view;
   return view;
 }
 
