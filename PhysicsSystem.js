@@ -23,6 +23,8 @@
     this.world = null;
     this.b2world = null;
     this.bodies = null;
+    this.staticBodies = null;
+
     this.bodiesByEntity = null;
 
     this.contacts = [];
@@ -37,6 +39,7 @@
     // box2d world
     this.b2world = new b2World(new b2Vec2(0, 0), false);
     this.bodies = [];
+    this.staticBodies = [];
     this.bodiesByEntity = {};
 
     //contact listener
@@ -50,62 +53,146 @@
     };
     this.b2world.SetContactListener(listener);
 
-    // debugDraw
-    /*
-    var debugDraw = new b2DebugDraw();
-    var debugCanvas = document.getElementById('debugCanvas');
-    var debugContext = debugCanvas.getContext('2d');
-    debugDraw.SetSprite(debugContext);
-    debugDraw.SetDrawScale(SCALE);
-    debugDraw.SetFillAlpha(0.7);
-    debugDraw.SetLineThickness(1.0);
-    debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
-    this.b2world.SetDebugDraw(debugDraw);
-    */
+    /* debugDraw
+     var debugDraw = new b2DebugDraw();
+     var debugCanvas = document.getElementById('debugCanvas');
+     var debugContext = debugCanvas.getContext('2d');
+     debugDraw.SetSprite(debugContext);
+     debugDraw.SetDrawScale(SCALE);
+     debugDraw.SetFillAlpha(0.7);
+     debugDraw.SetLineThickness(1.0);
+     debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
+     this.b2world.SetDebugDraw(debugDraw);
+     //*/
   };
 
   PhysicsSystem.prototype.removeFromWorld = function() {
     this.world = null;
     this.b2world = null;
     this.bodies = null;
+    this.staticBodies = null;
   };
 
   PhysicsSystem.prototype.step = function(delta) {
+    var bodies = this.bodies;
+    var world = this.world;
+    var bodiesByEntity = this.bodiesByEntity;
 
-    var collidedEnts = this.world.getEntities('collision');
-    for(var i = 0, ent; !!(ent = collidedEnts[i]); i++ ) {
-      ent.del('collision');
+    // delete removed bodies
+    for (var eid in bodiesByEntity) {
+      var ent = world.getEntityById(eid);
+      if (!ent || !ent.has('rigidBody')) {
+        var body = bodiesByEntity[eid];
+        this.b2world.DestroyBody(body);
+        delete bodiesByEntity[eid];
+      }
     }
-    
+
+    // fix bodies without position
+    var entsWithBody = this.world.getEntities('rigidBody');
+    for (var i = 0, ent; !!(ent = entsWithBody[i]); i++) {
+      // bodies must have position
+      var position = ent.get('position');
+      if (!position) {
+        position = {x: 0, y: 0};
+        ent.add('position', position);
+      }
+    }
+
+    // create added bodies
+    for (var i = 0, ent; !!(ent = entsWithBody[i]); i++) {
+      // if ent does not have a body, create it
+      var body = bodiesByEntity[ent.id];
+      if (!body) {
+        body = this._createBody(ent);
+      }
+    }
+
+    this.clearCollisions();
+
     this.handleMoveTo();
 
-    var updated = false;
+    //* == position ==
+    for (var i = 0, l = bodies.length; i < l; i++) {
+      var body = bodies[i];
+      var entity = body.GetUserData();
+      var position = entity.get('position');
+      position.x = body.GetWorldCenter().x * SCALE;
+      position.y = body.GetWorldCenter().y * SCALE;
+    }
+    // == position == */
+
+    // ==velocity==
+    var velEnts = this.world.getEntities('velocity');
+    for (var i = 0, ent; !!(ent = velEnts[i]); i++) {
+      var velocity = ent.get('velocity');
+      var dBody = this.bodiesByEntity[ent.id];
+      var v = dBody.GetLinearVelocity();
+      v.x = velocity.x;
+      v.y = velocity.y;
+      dBody.SetLinearVelocity(v);
+      //ent.del('velocity');
+    }
+    // ==velocity==
+
+    this.stepBox2DWorld(delta);
+
+    this.updateBodiesPosition();
+
+    // ==velocity==
+    var velEnts = this.world.getEntities('velocity');
+    for (var i = 0, ent; !!(ent = velEnts[i]); i++) {
+      var velocity = ent.get('velocity');
+      var dBody = this.bodiesByEntity[ent.id];
+      var v = dBody.GetLinearVelocity();
+      if (v.x || v.y) {
+        velocity.x = v.x;
+        velocity.y = v.y;
+      } else {
+        ent.del('velocity');
+      }
+    }
+    // ==velocity== 
+
+    this.setCollisions();
+
+  };
+
+  PhysicsSystem.prototype.clearCollisions = function() {
+    var collidedEnts = this.world.getEntities('collision');
+    for (var i = 0, ent; !!(ent = collidedEnts[i]); i++) {
+      ent.del('collision');
+    }
+  };
+
+  PhysicsSystem.prototype.stepBox2DWorld = function(delta) {
     this.fixedTimestepAccumulator += delta / 1000.0;
     while (this.fixedTimestepAccumulator >= TIMESTEP) {
       this.b2world.Step(TIMESTEP, 8, 3);
       this.fixedTimestepAccumulator -= TIMESTEP;
-      updated = true;
     }
 
-    if (updated) {
-      var bodies = this.bodies;
-      for (var i = 0, l = bodies.length; i < l; i++) {
-        var body = bodies[i];
-        var entity = body.GetUserData();
-        var position = entity.get('position');
-        position.x = body.GetWorldCenter().x * SCALE;
-        position.y = body.GetWorldCenter().y * SCALE;
-      }
-    }
+    //this.b2world.DrawDebugData();
+  };
 
+  PhysicsSystem.prototype.updateBodiesPosition = function() {
+    var bodies = this.bodies;
+    for (var i = 0, l = bodies.length; i < l; i++) {
+      var body = bodies[i];
+      var entity = body.GetUserData();
+      var position = entity.get('position');
+      position.x = body.GetWorldCenter().x * SCALE;
+      position.y = body.GetWorldCenter().y * SCALE;
+    }
+  };
+
+  PhysicsSystem.prototype.setCollisions = function() {
     for (var i = 0, len = this.contacts.length; i < len; i++) {
       var contact = this.contacts[i];
-      contact.a.add('collision', { other : contact.b } );
-      contact.b.add('collision', { other : contact.a } );
+      contact.a.add('collision', {other: contact.b});
+      contact.b.add('collision', {other: contact.a});
     }
     this.contacts.length = 0;
-    
-    //this.b2world.DrawDebugData();
   };
 
   PhysicsSystem.prototype.handleMoveTo = function() {
@@ -133,15 +220,13 @@
     }
   };
 
-  PhysicsSystem.prototype.entityAdded = function(entity) {
+  PhysicsSystem.prototype._createBody = function(entity) {
 
     var rigidBody = entity.get('rigidBody'),
-        position = entity.get('position'),
-        velocity = entity.get('velocity');
+        position = entity.get('position');
 
-    if (rigidBody && position) {
+    if (rigidBody.bodyType !== 'static') {
       var bodyTypeMap = {
-        'static': b2Body.b2_staticBody,
         'kinematic': b2Body.b2_kinematicBody,
         'dynamic': b2Body.b2_dynamicBody
       };
@@ -168,33 +253,40 @@
       bodyDef.fixedRotation = true;
       var body = this.b2world.CreateBody(bodyDef);
       body.CreateFixture(fixture);
+
       body.SetUserData(entity);
-
-      if (velocity) {
-        body.SetLinearVelocity(new b2Vec2(velocity.x, velocity.y));
-      }
-
       this.bodies.push(body);
       this.bodiesByEntity[entity.id] = body;
-    }
 
-  };
+      return body;
+    } else {
 
-  PhysicsSystem.prototype.entityRemoved = function(entity) {
+      // == body ==
+      var bodyDef = new b2BodyDef;
+      bodyDef.type = b2Body.b2_staticBody;
+      bodyDef.position.x = position.x / SCALE;
+      bodyDef.position.y = position.y / SCALE;
+      // == body ==
+      var body = this.b2world.CreateBody(bodyDef);
+      // == body ==
 
-    var body = this.bodiesByEntity[entity.id];
+      // == fixture ==
+      var fixtureDef = new b2FixtureDef;
+      fixtureDef.density = 1;
+      fixtureDef.restitution = 1;
+      fixtureDef.friction = 0;
+      fixtureDef.shape = new b2PolygonShape;
+      fixtureDef.shape.SetAsBox(0.5 * rigidBody.w / SCALE, 0.5 * rigidBody.h / SCALE);
+      // == fixture ==
+      body.CreateFixture(fixtureDef);
+      // == fixture ==
 
-    if (body) {
-      this.bodiesByEntity[entity.id] = null;
-      this.b2world.DestroyBody(body);
+      // ==
+      body.SetUserData(entity);
+      this.bodies.push(body);
+      this.bodiesByEntity[entity.id] = body;
 
-      var bodies = this.bodies;
-      for (var i = 0, len = bodies.length; i < len; i++) {
-        if (bodies[i] === body) {
-          this.bodies.splice(i, 1);
-          break;
-        }
-      }
+      return body;
     }
 
   };

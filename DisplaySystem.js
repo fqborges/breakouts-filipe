@@ -14,7 +14,7 @@ DisplaySystem.prototype.addToWorld = function(world) {
   // setup fps
   var stats = new Stats();
   stats.setMode(0); // 0: fps, 1: ms
-  stats.domElement.style.position = 'relative';
+  stats.domElement.style.position = 'fixed';
   stats.domElement.style.left = '0px';
   stats.domElement.style.top = '0px';
   this._stats = stats;
@@ -51,7 +51,8 @@ DisplaySystem.prototype.step = function() {
     // if not has position, ignore
     var position = ent.get('position');
     if (!position) {
-      continue;
+      position = {x: 0, y: 0};
+      ent.add('position', position);
     }
     // get sprite and check image
     var sprite = ent.get('sprite');

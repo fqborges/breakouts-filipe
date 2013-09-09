@@ -107,7 +107,7 @@
       world.addSystem(new InputSystem(stage));
       world.addSystem(new PhysicsSystem());
       world.addSystem(new OutOfLevelSystem());
-      world.addSystem(new GameWorkflowSystem());
+      world.addSystem(new GameStateSystem());
       world.addSystem(new ExpirationSystem());
       world.addSystem(new AnimationSystem(resources));
       world.addSystem(new DisplaySystem(stage, resources));
@@ -163,14 +163,6 @@
       paddle.add('sprite', {imgid: 'img_tiles', w: 3 * BLOCK, h: BLOCK, x: 0 * BLOCK, y: 4 * BLOCK});
       paddle.add('input', {});
       world.addEntity(paddle);
-
-      // COUNTDOWN
-      var countdown = world.createEntity();
-      countdown.add('position', {x: 320 / 2, y: 480 / 2});
-      countdown.add('sprite', {});
-      countdown.add('animated', {animation: 'anim_countdown'});
-      countdown.add('expires', {timeout: 3});
-      world.addEntity(countdown);
     }
   };
 
