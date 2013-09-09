@@ -162,6 +162,7 @@
       paddle.add('position', {x: (9 + 0.5 * 3) * BLOCK, y: (23 + 0.5 * 1) * BLOCK});
       paddle.add('sprite', {imgid: 'img_tiles', w: 3 * BLOCK, h: BLOCK, x: 0 * BLOCK, y: 4 * BLOCK});
       paddle.add('input', {});
+      paddle.add('paddle', {});
       world.addEntity(paddle);
     }
   };

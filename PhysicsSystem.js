@@ -45,11 +45,15 @@
     //contact listener
     var system = this;
     var listener = new b2Listener();
-    listener.PostSolve = function(contact, impulse) {
+    listener.BeginContact = function(contact) {
       var entA = contact.GetFixtureA().GetBody().GetUserData();
       var entB = contact.GetFixtureB().GetBody().GetUserData();
 
       system.contacts.push({a: entA, b: entB});
+      //console.log('BeginContact');
+    };
+    listener.PostSolve = function(contact, impulse) {
+      //console.log('PostSolve');
     };
     this.b2world.SetContactListener(listener);
 
@@ -236,6 +240,9 @@
       fixture.density = 1;
       fixture.restitution = 1;
       fixture.friction = 0;
+      if (rigidBody.isSensor) {
+        fixture.isSensor = true;
+      }
 
       if (rigidBody.type === 'ball' && false) {
         var rad = 0.5 * rigidBody.w;
