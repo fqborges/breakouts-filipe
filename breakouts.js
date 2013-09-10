@@ -59,49 +59,145 @@
     }
   };
 
-  var breakouts = {
-    BLOCK: 16,
-    load: function(loadComplete) {
+  var loadScene = {
+    _tickListener: null,
+    setup: function() {
+
+      // setup stage
+      var stage = new createjs.Stage('breakouts');
+      stage.canvas.style.backgroundColor = "#000000";
+      stage.autoClear = true;
+      stage.tickOnUpdate = false;
+      createjs.Touch.enable(stage);
+
+      // setup world
+      var world = this._world = new World();
+      world.addSystem(new DisplaySystem(stage, resources));
+
+      // text
+      var delay = world.createEntity();
+      delay.add('position', {x: 160, y: 160});
+      delay.add('text', {value: 'Carregando...', align: 'center'});
+      world.addEntity(delay);
+
+      // start loading
+      this._startLoading();
+    },
+    step: function(event) {
+      this._world.step(event.delta);
+    },
+    _startLoading: function() {
       var queue = new createjs.LoadQueue(false);
+      queue.addEventListener("complete", this._handleComplete.bind(this));
+      queue.addEventListener("progress", this._handleProgress.bind(this));
       for (var key in resources.images) {
         var url = resources.images[key];
         queue.loadFile(url, false);
       }
-      queue.addEventListener("complete", function() {
-        // load images
-        for (var key in resources.images) {
-          var url = resources.images[key];
-          resources.images[key] = queue.getResult(url);
-        }
-        // load spriteSheets
-        for (var key in resources.spriteSheets) {
-          var data = resources.spriteSheets[key];
-          for (var i = 0; i < data.images.length; i++) {
-            data.images[i] = resources.images[ data.images[i] ];
-          }
-          var spriteSheet = new createjs.SpriteSheet(data);
-          resources.spriteSheets[key] = spriteSheet;
-        }
-        // load animations
-        for (var key in resources.animations) {
-          var animation = resources.animations[key];
-          var spriteSheet = resources.spriteSheets[animation.spriteSheet];
-          var frames = animation.frames;
-          for (var i = 0; i < frames.length; i++) {
-            frames[i] = spriteSheet.getFrame(frames[i]);
-          }
-        }
-        loadComplete && loadComplete();
-      });
       queue.load();
     },
+    _handleProgress: function(event) {
+      console.log(event.progress);
+    },
+    _handleComplete: function(event) {
+      var queue = event.target;
+      // set images
+      for (var key in resources.images) {
+        var url = resources.images[key];
+        resources.images[key] = queue.getResult(url);
+      }
+      // set spriteSheets
+      for (var key in resources.spriteSheets) {
+        var data = resources.spriteSheets[key];
+        for (var i = 0; i < data.images.length; i++) {
+          data.images[i] = resources.images[ data.images[i] ];
+        }
+        var spriteSheet = new createjs.SpriteSheet(data);
+        resources.spriteSheets[key] = spriteSheet;
+      }
+      // set animations
+      for (var key in resources.animations) {
+        var animation = resources.animations[key];
+        var spriteSheet = resources.spriteSheets[animation.spriteSheet];
+        var frames = animation.frames;
+        for (var i = 0; i < frames.length; i++) {
+          frames[i] = spriteSheet.getFrame(frames[i]);
+        }
+      }
+      setTimeout(function() {
+        Game.scene(menuScene);
+      }, 500);
+    }
+  };
+
+  var menuScene = {
+    setup: function() {
+
+      // setup stage
+      var stage = new createjs.Stage('breakouts');
+      stage.autoClear = true;
+      stage.tickOnUpdate = false;
+      createjs.Touch.enable(stage);
+      // setup world
+      var world = this._world = new World();
+      world.addSystem(new MainMenuSystem(stage));
+      world.addSystem(new DisplaySystem(stage, resources));
+
+      this.scene();
+
+    },
+    step: function(event) {
+      this._world.step(event.delta);
+    },
+    scene: function() {
+      var BLOCK = 16;
+      var world = this._world;
+      // BACKGROUND
+      var bg = world.createEntity();
+      bg.add('background', {image: resources.images['bg_prerendered']});
+      world.addEntity(bg);
+
+      // PADDLE
+      var paddle = world.createEntity();
+      paddle.add('position', {x: (9 + 0.5 * 3) * BLOCK, y: (23 + 0.5 * 1) * BLOCK});
+      paddle.add('sprite', {imgid: 'img_tiles', w: 3 * BLOCK, h: BLOCK, x: 0 * BLOCK, y: 4 * BLOCK});
+      world.addEntity(paddle);
+
+      // create ball
+      var ball = world.createEntity();
+      ball.add('sprite', {imgid: 'img_tiles', w: BLOCK, h: BLOCK, x: 7 * BLOCK, y: 4 * BLOCK});
+      ball.add('position', {x: 2 * BLOCK, y: 10 * BLOCK});
+      ball.add('ball', {});
+      world.addEntity(ball);
+
+      // create bricks
+      var colors = ['blue', 'orange', 'red', 'green'];
+      for (var ix = 5; ix < 15; ix += 3) {
+        for (var iy = 5; iy < 10; iy += 2) {
+          var colorIndex = Math.floor(Math.random() * 4);
+          var brick = world.createEntity();
+          brick.add('sprite', {imgid: 'img_tiles', x: 0 * BLOCK, y: colorIndex * BLOCK, w: 2 * BLOCK, h: 1 * BLOCK});
+          brick.add('position', {x: (ix + 0.5 * 2) * BLOCK, y: (iy + 0.5 * 1) * BLOCK});
+          brick.add('brick', {color: colors[colorIndex]});
+          world.addEntity(brick);
+        }
+      }
+      
+      // text
+      var delay = world.createEntity();
+      delay.add('position', {x: 160, y: 260});
+      delay.add('text', {value: 'Clique para iniciar.', align: 'center'});
+      world.addEntity(delay);
+    }
+  };
+
+  var breakoutsScene = {
     setup: function() {
       // setup stage
       var stage = new createjs.Stage('breakouts');
       stage.autoClear = true;
       stage.tickOnUpdate = false;
       createjs.Touch.enable(stage);
-
       // setup world
       var world = this.world = new World();
       world.addSystem(new InputSystem(stage));
@@ -112,18 +208,11 @@
       world.addSystem(new AnimationSystem(resources));
       world.addSystem(new DisplaySystem(stage, resources));
 
+      this.scene();
     },
-    run: function() {
-      var world = this.world;
-
-      createjs.Ticker.useRAF = true;
-      createjs.Ticker.setFPS(30);
-      createjs.Ticker.addEventListener('tick',
-          function(event) {
-            if (!event.paused)
-              world.step(event.delta);
-          }
-      );
+    step: function(event) {
+      if (!event.paused)
+        this.world.step(event.delta);
     },
     pause: function() {
       createjs.Ticker.setPaused(true);
@@ -132,7 +221,7 @@
       createjs.Ticker.setPaused(false);
     },
     scene: function() {
-      var BLOCK = breakouts.BLOCK;
+      var BLOCK = 16;
       var world = this.world;
 
       // BACKGROUND
@@ -167,20 +256,55 @@
     }
   };
 
+  var Game = {
+    _scene: null,
+    run: function() {
+
+      if (!this._tickListener) {
+        var game = this;
+        this._tickListener = function(event) {
+          game._step(event);
+        };
+      }
+
+      createjs.Ticker.useRAF = false;
+      createjs.Ticker.setFPS(60);
+      createjs.Ticker.addEventListener('tick', this._tickListener);
+    },
+    quit: function() {
+      createjs.Ticker.removeEventListener('tick', this._tickListener);
+    },
+    _step: function(event) {
+      if (this._scene && this._scene.step)
+        this._scene.step(event);
+    },
+    scene: function(scene) {
+      this._scene = scene;
+      scene.setup();
+    }
+  };
+
   window.addEventListener('load', function() {
-    breakouts.load(function() {
-      breakouts.setup();
-      breakouts.run();
-      breakouts.scene();
-    });
-  }, false);
+    Game.loadScene = loadScene;
+    Game.breakoutsScene = breakoutsScene;
+    Game.menuScene = menuScene;
 
+    window.Game = Game;
+
+    Game.run();
+    Game.scene(loadScene);
+    /*breakouts.load(function() {
+     breakouts.setup();
+     breakouts.scene();
+     breakouts.run();
+     });*/
+  }, false);
   window.addEventListener('blur', function() {
-    breakouts.pause();
+    // breakouts.pause();
+    Game.quit();
   }, false);
-
   window.addEventListener('focus', function() {
-    breakouts.resume();
+    //breakouts.resume();
+    //Game.run();
   }, false);
-
 })();

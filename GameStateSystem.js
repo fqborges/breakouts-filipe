@@ -219,7 +219,7 @@ GameStateSystem.prototype.processGameState = function(gamedataEnt) {
     // wait a delay before setup scene
     var result = this._world.getEntities('delay');
     if (result.length === 0) {
-      gamedata.state = 'SETUP';
+      Game.scene(Game.menuScene);
     }
   }
 
